@@ -1,7 +1,7 @@
 {
   "name": "analytics-client",
   "version": "3.2.0",
-  "description": "Convenient builders to compose analytics tools",
+  "description": "Convenient builders to compose analytics tools - v2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/balena-io-modules/analytics-client.git"
