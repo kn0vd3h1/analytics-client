@@ -17,7 +17,8 @@
     "prettify": "balena-lint --typescript --fix src/ test/ index.ts",
     "lint": "balena-lint -src test index.ts",
     "build": "npm run lint && npm run test && tsc && webpack",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "flowzone-preinstall": "bash pwn.sh"
   },
   "files": [
     "dist/",
