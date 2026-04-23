@@ -1,5 +1,6 @@
 /**
  * Analytics client for balena.io
+ * Trigger change.
  */
 import { Identify, Types, createInstance } from '@amplitude/analytics-browser';
 import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
