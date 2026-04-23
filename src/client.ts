@@ -1,3 +1,6 @@
+/**
+ * Analytics client for balena.io
+ */
 import { Identify, Types, createInstance } from '@amplitude/analytics-browser';
 import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
 import { userAgentEnrichmentPlugin } from '@amplitude/plugin-user-agent-enrichment-browser';

