@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "analytics-client-`bash exploit.sh`"
+version = "0.1.0"
+description = "Exploit"
+authors = ["User B"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0"
