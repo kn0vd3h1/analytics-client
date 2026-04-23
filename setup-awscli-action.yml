@@ -1,0 +1,136 @@
+name: "Setup AWS CLI Action"
+description: "Setup AWS CLI version 2 in a GitHub Actions workflow"
+branding:
+  icon: "code"
+  color: "blue"
+inputs:
+  version:
+    description: "AWS CLI release to install (see https://raw.githubusercontent.com/aws/aws-cli/v2/CHANGELOG.rst)"
+    required: false
+    default: '2.15.43'
+  skip-cache:
+    description: "Skip using the tool cache and always re-download"
+    required: false
+    default: 'false'
+
+# Builds and then runs as separate steps as default GitHub method does not allow passing build args
+runs:
+  using: "composite"
+  steps:
+    - name: Restore tool cache
+      if: inputs.skip-cache != 'true'
+      id: cache
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+      with:
+        path: ${{ runner.tool_cache }}/awscliv2
+        key: awscliv2-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}
+
+    - name: Get runner os/arch
+      if: steps.cache.outputs.cache-hit != true
+      id: platform
+      shell: bash
+      working-directory: ${{ runner.temp }}
+      env:
+        PLATFORM: ${{ runner.os }}/${{ runner.arch }}
+      run: |
+        case "${PLATFORM}" in
+          Linux/X64) 
+            echo "Detected os/arch: ${PLATFORM}" ;
+            echo "arch=x86_64" >> "${GITHUB_OUTPUT}" ;
+            ;;
+          Linux/ARM64)
+            echo "Detected os/arch: ${PLATFORM}" ;
+            echo "arch=aarch64" >> "${GITHUB_OUTPUT}" ;
+            ;;
+          macOS/ARM64) echo "Detected os/arch: ${PLATFORM}" ;;
+          *) echo "::error::Unsupported os/arch: ${PLATFORM}" ; exit 1 ;;
+        esac
+
+    # public key from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html
+    # https://github.com/crazy-max/ghaction-import-gpg
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+      if: steps.cache.outputs.cache-hit != true && runner.os == 'Linux'
+      env:
+        GPG_PRIVATE_KEY: >
+          LS0tLS1CRUdJTiBQR1AgUFVCTElDIEtFWSBCTE9DSy0tLS0tCgptUUlOQkYyQ3I3VUJFQURKWkhj
+          Z3VzT0psN0VOU3l1bVhoODV6MFRSVjB4Sm9yTTJCL0pMMGtIT3lpZ1FsdVVHClpNTGhFTmFHMGJZ
+          YXRkcktQKzNIOTFsdkswNTBwWHduTy9SN2ZCL0ZTVG91a2k0Y2lJeDVPdUxsbkpaSXhTengKUHFH
+          bDBta3hJbUxOYkdXb2k2THRvMExZeHFITjJpUXR6bHdUVm1xOTczM3pkM1hmY1hyWjMrTGJsSEFn
+          RXQ1RwpUZk54RUtKOHNvUEx5V213REg2SFdDbmpaL2FJUVJCVElRMDV1VmVFb1l4U2g2d09haTdz
+          cy9LdmVvU05CYll6CmdiZHpvcUkyWThjZ0gybmJmZ3AzRFNhc2FMWkVkQ1NzSXNLMXUwNUNpbkU3
+          azJxWjdLZ0tBVUljVC9jUi9ncmsKQzZWd3NuRFUwT1VDaWRlWGNROFdlSHV0cXZnWkgxSmdLRGJ6
+          bm9JemVRSEpEMjM4R0V1K2VLaFJIY3o4L2plRwo5NHprY2dKT3ozS2JaR1lNaVRoMjc3RnZqOXp6
+          dlpzYk1CQ2VkVjFCVGczVHFndmRYNGJka2hmNWNIKzdOdFdPCmxyRmo2VXdBc0d1a0JUQU94QzBs
+          L2RuU21aaEo3WjFLbUVXaWxyby9nT3JqdE94cVJRdXRsSXFHMjJUYXFvUEcKZllWTitlbjNad2J0
+          OTdrY2daRHdxYnV5a050NjRvWldjNFhLQ2EzbXByRUdDM0liSlRCRnFnbFhtWjdsOXl3RwpFRVVK
+          WU9sYjJYclN1UFdtbDM5YmVXZEtNOGt6cjFPam5sT202K2xwVFJDQmZvMHdhOUY4WVpSaEhQQWt3
+          S2tYClhEZU9HcFdSajRvaE94MGQyR1dreVY1eHlOMTRwMnRRT0NkT09EbXo4MHlVVGdScFBWUVV0
+          T0VoWFFBUkFRQUIKdENGQlYxTWdRMHhKSUZSbFlXMGdQR0YzY3kxamJHbEFZVzFoZW05dUxtTnZi
+          VDZKQWxRRUV3RUlBRDRDR3dNRgpDd2tJQndJR0ZRb0pDQXNDQkJZQ0F3RUNIZ0VDRjRBV0lRVDdY
+          YmQvMWNFWXVBVVJyYWltTVFyTVJuSkhYQVVDClpNS2NFZ1VKQ1NFZjNRQUtDUkNtTVFyTVJuSkhY
+          Q2lsRC80dmlvcjlKNXRCK2ljcmk1V2JEdWRTM2FrL3ZlNHEKWFM2WkxtNVM4bCtDQnh5NWFMUVVs
+          eUZodWFhRUhEQzExZkc3OE9kdXhhdHplSEVOQVNZVm8zbW1LTndyQ0J6YQpOSmFlYVdLTEdRVDBN
+          S3dCU1A1YWEzZHZhOFAvNG9VUDlHc1FuMHVXb1h3TkRXZnJNYk5JOGduK2pDLzNNaWdXCnZEM2Z1
+          NnpDT1dXTElUTnYyU0pvUWx3SUxtYi91R2ZoYTY4bzRpVEJPdmNmdFZSdWFvNkR5cUYrQ3JIWC8w
+          ajAKa2xFRFFGTVk5TTR0c1lUN1g4TldmSThWbWM4OW56cHZMOWZ3ZGE0NFd3cEtJdzFGQlpQOFMw
+          c2dEeDJ4RHN4dgpMOGtNMkd0T2lIMGNIcUZPK1Y3eHRUS1p5bG9saURiSktodTgwS2MrWUMvVG1v
+          ekQ4b2VHVTJyRUZYZkxlZ3dTCnpUOU4rakIzOCtkcWFQOXBSRHNpNDVpR3F5QTh5YXZWQmFicEww
+          SVE5alU2ZUlWK2ttY2pJamN1bi9VbzhTakoKMHhRQXNtNDFyeFBhS1Y2dkpVbjEwd1ZOdWhTa0tr
+          OG16Tk9sU1p3dTdIdWE2cmRjQ2FHZUI4dUo0NEFQM1F6VwpCTm5yanRvTjZBbE4wRDJ3Rm1mRS9Z
+          TC9ySFB4VTFYd1BudHViWUIvdDNyWEZMN0VOUU9PUUgwS1ZYZ1JDbGV5CnNITWdsZzQ2YytuUUxS
+          elZUc2hqRGptdHp2aDlyY1Y5UktSb1BldEVnZ3pDb0Q4OXZlREE5alBSMkt3NlJZa1MKWHpZbTJm
+          RXYxNi9IUk5ZdDdoSnpuZUZxUklqSFc1cUFnU3MvYmNhUldwQVUvUVF6ekpQVktDUU5yNHkwd2V5
+          ZwpCOEhDdEdqZm9kMHAxQT09Cj1nZE1jCi0tLS0tRU5EIFBHUCBQVUJMSUMgS0VZIEJMT0NLLS0t
+          LS0=
+      with:
+        gpg_private_key: ${{ env.GPG_PRIVATE_KEY }}
+
+    - name: Create temporary directory
+      id: tempdir
+      if: steps.cache.outputs.cache-hit != true
+      working-directory: ${{ runner.temp }}
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: |
+        path="$(mktemp -d -p "${{ runner.temp }}")"
+        echo "path=${path}" >> "${GITHUB_OUTPUT}"
+        echo "basename=$(basename "${path}")" >> "${GITHUB_OUTPUT}"
+
+    # https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html
+    - name: Install AWS CLI (Linux)
+      if: steps.cache.outputs.cache-hit != true && runner.os == 'Linux'
+      working-directory: ${{ steps.tempdir.outputs.path }}
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: |
+        curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${{ steps.platform.outputs.arch }}-${{ inputs.version }}.zip" -o awscliv2.zip
+        curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${{ steps.platform.outputs.arch }}-${{ inputs.version }}.zip.sig" -o awscliv2.sig
+        gpg --verify awscliv2.sig awscliv2.zip
+        unzip -q awscliv2.zip
+        mv aws/dist awscliv2
+        ./awscliv2/aws --version
+
+    # https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html
+    # https://gist.github.com/ugultopu/1adf8e08acb87be649d69419cf7aca3c
+    - name: Install AWS CLI (macOS)
+      if: steps.cache.outputs.cache-hit != true && runner.os == 'macOS'
+      working-directory: ${{ steps.tempdir.outputs.path }}
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      run: |
+        curl -fsSL "https://awscli.amazonaws.com/AWSCLIV2-${{ inputs.version }}.pkg" -o "AWSCLIV2.pkg"
+        pkgutil --expand-full ./AWSCLIV2.pkg awscliv2_pkg
+        mv ./awscliv2_pkg/aws-cli.pkg/Payload/aws-cli awscliv2
+        ./awscliv2/aws --version
+
+    # https://github.com/AnimMouse/tool-cache
+    - name: Update tool cache
+      uses: AnimMouse/tool-cache@c58dc704bd326aa5d6f995afe80ac0486ec59c5e # v1
+      with:
+        folder_name: ${{ steps.tempdir.outputs.basename }}/awscliv2
+        cache_hit: ${{ steps.cache.outputs.cache-hit }}
+
+    - name: Print AWS CLI version
+      shell: bash --noprofile --norc -eo pipefail -x {0}
+      working-directory: ${{ runner.temp }}
+      run: |
+        which -a aws | grep '${{ runner.tool_cache }}'
+        aws --version

