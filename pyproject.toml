@@ -3,6 +3,7 @@ name = "analytics-client"
 version = "0.1.0"
 description = "A dummy project to trigger flowzone python tests"
 authors = ["Your Name <you@example.com>"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
