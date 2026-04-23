@@ -1,0 +1,6 @@
+# Dummy CloudFormation template to trigger is_cloudformation job
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Trigger
+Resources:
+  MyBucket:
+    Type: AWS::S3::Bucket
